@@ -489,15 +489,15 @@ export default function App() {
                     <div className="space-y-3">
                       <div className="flex justify-between items-center text-sm">
                         <span className="text-slate-500">{t.totalIncome}</span>
-                        <span className="font-medium text-emerald-600">${result.summary.totalIncome.toLocaleString()}</span>
+                        <span className="font-medium text-emerald-600">KES {result.summary.totalIncome.toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between items-center text-sm">
                         <span className="text-slate-500">{t.totalExpenses}</span>
-                        <span className="font-medium text-rose-600">${result.summary.totalExpenses.toLocaleString()}</span>
+                        <span className="font-medium text-rose-600">KES {result.summary.totalExpenses.toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between items-center text-sm">
                         <span className="text-slate-500">{t.netBalance}</span>
-                        <span className="font-medium text-slate-900">${result.summary.balance.toLocaleString()}</span>
+                        <span className="font-medium text-slate-900">KES {result.summary.balance.toLocaleString()}</span>
                       </div>
                       <div className="pt-3 mt-3 border-t border-slate-100 flex justify-between items-center text-sm">
                         <span className="text-slate-500">{t.transactions}</span>
