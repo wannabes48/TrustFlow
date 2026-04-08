@@ -7,8 +7,10 @@ import {
 } from 'recharts';
 import { 
   UploadCloud, Activity, ShieldCheck, AlertTriangle, 
-  Wallet, PiggyBank, ArrowRight, Loader2, Download, Globe, Lock
+  Wallet, PiggyBank, ArrowRight, Loader2, Download, Globe, Lock,
+  ChevronRight, CheckCircle2, Users, TrendingUp
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 import { cn } from './lib/utils';
 import { translations, Language } from './translations';
 import html2canvas from 'html2canvas';
@@ -64,6 +66,7 @@ QB77788899 Confirmed. Ksh 2,500 sent to Hardware Store on 25/10/23 at 9:00 AM. N
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
 
 export default function App() {
+  const [view, setView] = useState<'landing' | 'dashboard'>('landing');
   const [inputText, setInputText] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
@@ -95,7 +98,6 @@ export default function App() {
     setResult(null);
 
     try {
-      // Step 1: Parse input (either CSV or raw SMS) using Gemini to extract structured transactions
       const parsePrompt = `
         You are a financial data parser. Extract transactions from the following text.
         The text might be raw M-Pesa SMS messages or CSV data.
@@ -138,7 +140,6 @@ export default function App() {
         throw new Error('No valid transactions found. Please check your input.');
       }
 
-      // Step 2: Calculate summary and chart data
       let totalIncome = 0;
       let totalExpenses = 0;
       const monthlyMap = new Map<string, { income: number; expenses: number }>();
@@ -183,7 +184,6 @@ export default function App() {
         transactionCount: transactions.length,
       };
 
-      // Step 3: Call Gemini for AI analysis and goal-oriented savings
       const analysisPrompt = `
         Analyze the following mobile money transaction summary for an informal worker to provide an alternative credit score.
         
@@ -229,18 +229,189 @@ export default function App() {
 
     } catch (err: any) {
       console.error(err);
-      setError(err.message || t.error);
+      const errorMessage = err.message || '';
+      if (errorMessage.includes('403') || errorMessage.includes('Forbidden')) {
+        setError('API Key Error (403 Forbidden): Please ensure your GEMINI_API_KEY is set in the Secrets panel, and that the key does not have restrictive HTTP referrer limits in Google Cloud.');
+      } else {
+        setError(errorMessage || t.error);
+      }
     } finally {
       setIsAnalyzing(false);
     }
   };
 
-  return (
+  const LandingPage = () => (
+    <div className="min-h-screen bg-white">
+      {/* Hero Section */}
+      <section className="relative overflow-hidden pt-20 pb-32">
+        <div className="max-w-6xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <motion.div 
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 text-indigo-600 text-xs font-bold uppercase tracking-wider mb-6">
+              <Activity className="w-4 h-4" />
+              {t.subtitle}
+            </div>
+            <h1 className="text-6xl lg:text-7xl font-bold tracking-tight text-slate-900 leading-[0.9] mb-8">
+              {t.heroTitle}
+            </h1>
+            <p className="text-xl text-slate-600 mb-10 leading-relaxed max-w-lg">
+              {t.heroDesc}
+            </p>
+            <div className="flex flex-wrap gap-4">
+              <button 
+                onClick={() => setView('dashboard')}
+                className="px-8 py-4 bg-indigo-600 text-white rounded-full font-bold text-lg hover:bg-indigo-700 transition-all flex items-center gap-2 shadow-lg shadow-indigo-200"
+              >
+                {t.getStarted}
+                <ArrowRight className="w-5 h-5" />
+              </button>
+              <button className="px-8 py-4 bg-white text-slate-900 border border-slate-200 rounded-full font-bold text-lg hover:bg-slate-50 transition-all">
+                {t.howItWorks}
+              </button>
+            </div>
+          </motion.div>
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="relative"
+          >
+            <div className="absolute -top-10 -left-10 w-64 h-64 bg-indigo-100 rounded-full blur-3xl opacity-50" />
+            <div className="absolute -bottom-10 -right-10 w-64 h-64 bg-emerald-100 rounded-full blur-3xl opacity-50" />
+            <div className="relative bg-white rounded-3xl shadow-2xl border border-slate-100 p-4 overflow-hidden">
+              <img 
+                src="https://picsum.photos/seed/finance/800/600" 
+                alt="TrustFlow Dashboard Preview" 
+                className="rounded-2xl w-full h-auto object-cover"
+                referrerPolicy="no-referrer"
+              />
+              <div className="absolute top-8 right-8 bg-white/90 backdrop-blur px-4 py-3 rounded-2xl shadow-xl border border-white/50 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center text-white">
+                  <ShieldCheck className="w-6 h-6" />
+                </div>
+                <div>
+                  <div className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Trust Score</div>
+                  <div className="text-xl font-black text-slate-900">84/100</div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Steps Section */}
+      <section className="py-24 bg-slate-50">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-slate-900 mb-4">{t.howItWorks}</h2>
+            <div className="w-20 h-1.5 bg-indigo-600 mx-auto rounded-full" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              { icon: UploadCloud, title: t.step1Title, desc: t.step1Desc, color: 'text-blue-500', bg: 'bg-blue-50' },
+              { icon: Activity, title: t.step2Title, desc: t.step2Desc, color: 'text-indigo-500', bg: 'bg-indigo-50' },
+              { icon: ShieldCheck, title: t.step3Title, desc: t.step3Desc, color: 'text-emerald-500', bg: 'bg-emerald-50' },
+            ].map((step, i) => (
+              <motion.div 
+                key={i}
+                whileHover={{ y: -5 }}
+                className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100"
+              >
+                <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center mb-6", step.bg)}>
+                  <step.icon className={cn("w-8 h-8", step.color)} />
+                </div>
+                <h3 className="text-xl font-bold text-slate-900 mb-3">{step.title}</h3>
+                <p className="text-slate-600 leading-relaxed">{step.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Why Section */}
+      <section className="py-24">
+        <div className="max-w-6xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+          <div className="order-2 lg:order-1">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-4">
+                <div className="h-48 bg-indigo-600 rounded-3xl flex items-center justify-center text-white p-6">
+                  <Users className="w-12 h-12" />
+                </div>
+                <div className="h-64 bg-slate-100 rounded-3xl overflow-hidden">
+                  <img src="https://picsum.photos/seed/market/400/600" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                </div>
+              </div>
+              <div className="space-y-4 pt-8">
+                <div className="h-64 bg-emerald-500 rounded-3xl overflow-hidden">
+                  <img src="https://picsum.photos/seed/worker/400/600" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                </div>
+                <div className="h-48 bg-slate-900 rounded-3xl flex items-center justify-center text-white p-6">
+                  <TrendingUp className="w-12 h-12" />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="order-1 lg:order-2">
+            <h2 className="text-4xl font-bold text-slate-900 mb-8">{t.whyTrustFlow}</h2>
+            <div className="space-y-8">
+              <div className="flex gap-4">
+                <div className="w-12 h-12 rounded-full bg-indigo-50 flex items-center justify-center shrink-0">
+                  <Lock className="w-6 h-6 text-indigo-600" />
+                </div>
+                <div>
+                  <h4 className="text-lg font-bold text-slate-900 mb-2">{t.privacyTitle}</h4>
+                  <p className="text-slate-600">{t.privacyDesc}</p>
+                </div>
+              </div>
+              <div className="flex gap-4">
+                <div className="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center shrink-0">
+                  <CheckCircle2 className="w-6 h-6 text-emerald-600" />
+                </div>
+                <div>
+                  <h4 className="text-lg font-bold text-slate-900 mb-2">{t.impactTitle}</h4>
+                  <p className="text-slate-600">{t.impactDesc}</p>
+                </div>
+              </div>
+            </div>
+            <button 
+              onClick={() => setView('dashboard')}
+              className="mt-12 px-8 py-4 bg-slate-900 text-white rounded-full font-bold text-lg hover:bg-slate-800 transition-all flex items-center gap-2"
+            >
+              {t.getStarted}
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="py-12 border-t border-slate-100">
+        <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="flex items-center gap-2 text-indigo-600">
+            <Activity className="w-6 h-6" />
+            <span className="text-xl font-bold tracking-tight">TrustFlow</span>
+          </div>
+          <div className="text-slate-500 text-sm">
+            © 2024 TrustFlow. Empowering the informal economy.
+          </div>
+          <div className="flex gap-6">
+            <button onClick={() => setLang('en')} className={cn("text-sm font-bold", lang === 'en' ? "text-indigo-600" : "text-slate-400")}>English</button>
+            <button onClick={() => setLang('sw')} className={cn("text-sm font-bold", lang === 'sw' ? "text-indigo-600" : "text-slate-400")}>Swahili</button>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+
+  const Dashboard = () => (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
       {/* Header */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-20">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-indigo-600">
+          <div className="flex items-center gap-2 text-indigo-600 cursor-pointer" onClick={() => setView('landing')}>
             <Activity className="w-6 h-6" />
             <span className="text-xl font-bold tracking-tight">{t.title}</span>
           </div>
@@ -255,6 +426,12 @@ export default function App() {
             >
               <Globe className="w-4 h-4" />
               {lang === 'en' ? 'SW' : 'EN'}
+            </button>
+            <button 
+              onClick={() => setView('landing')}
+              className="text-sm font-bold text-slate-500 hover:text-slate-900"
+            >
+              {t.backToHome}
             </button>
           </div>
         </div>
@@ -512,5 +689,31 @@ export default function App() {
         </div>
       </main>
     </div>
+  );
+
+  return (
+    <AnimatePresence mode="wait">
+      {view === 'landing' ? (
+        <motion.div
+          key="landing"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.4 }}
+        >
+          <LandingPage />
+        </motion.div>
+      ) : (
+        <motion.div
+          key="dashboard"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.4 }}
+        >
+          <Dashboard />
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
