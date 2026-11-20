@@ -1,1 +1,56 @@
 @import "tailwindcss";
+
+/*
+ * TrustFlow design tokens.
+ * Plain hex values on purpose: they render identically in charts, SVG and the
+ * generated PDF certificate.
+ */
+@theme {
+  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Instrument Serif", ui-serif, Georgia, serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  --color-ink: #0b1f17;
+  --color-forest: #0f3d2e;
+  --color-forest-2: #164a38;
+  --color-leaf: #1fa971;
+  --color-lime: #c6f36b;
+  --color-paper: #f6f3ec;
+  --color-sand: #ece6d9;
+  --color-line: #ddd5c4;
+  --color-muted: #66756d;
+  --color-amber: #e8a33d;
+  --color-coral: #e0573f;
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  body {
+    @apply bg-paper text-ink font-sans;
+  }
+  ::selection {
+    background: var(--color-lime);
+    color: var(--color-ink);
+  }
+}
+
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Subtle paper grain + soft light used behind hero sections */
+@utility paper-glow {
+  background-image:
+    radial-gradient(60rem 30rem at 85% -10%, rgb(198 243 107 / 0.28), transparent 60%),
+    radial-gradient(40rem 24rem at -10% 10%, rgb(31 169 113 / 0.12), transparent 60%);
+}
+
+@utility grid-lines {
+  background-image:
+    linear-gradient(rgb(255 255 255 / 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 255 255 / 0.05) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
